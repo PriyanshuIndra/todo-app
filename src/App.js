@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import './App.css';
 import db from './firebase'
+import firebase from 'firebase/compat/app';
 
 // Importing components of Material UI
 import SendIcon from '@mui/icons-material/Send';
@@ -18,7 +19,7 @@ function App() {
 
   useEffect(() => {
     // this code here... fires when the app.js loads
-    db.collection('todos').onSnapshot(snapshot => {
+    db.collection('todos').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
       console.log(snapshot.docs.map(doc => doc.data().task));
       setTodos(snapshot.docs.map(doc => doc.data().task));
     })
@@ -34,10 +35,12 @@ function App() {
   }
 
   function submitHandler (event) {
-    
-    setTodos(prevValue => {
-      return [inputValue, ...prevValue]
-    })
+  
+    // adding the inputs to the database whenever we submit the input
+    db.collection('todos').add({
+      task: inputValue,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
 
     setInputValue('');
     event.preventDefault();
