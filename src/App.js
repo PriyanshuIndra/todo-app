@@ -1,5 +1,6 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import './App.css';
+import db from './firebase'
 
 // Importing components of Material UI
 import SendIcon from '@mui/icons-material/Send';
@@ -12,6 +13,16 @@ function App() {
 
   const [todos, setTodos] = useState([]);
   let [inputValue, setInputValue] = useState('');
+
+  // when the app loads, we  need to listen to the database and fetch new todos as the added/removed
+
+  useEffect(() => {
+    // this code here... fires when the app.js loads
+    db.collection('todos').onSnapshot(snapshot => {
+      console.log(snapshot.docs.map(doc => doc.data().task));
+      setTodos(snapshot.docs.map(doc => doc.data().task));
+    })
+  }, [])
 
   function inputHandler(event) {
     let value = event.target.value;
@@ -38,7 +49,7 @@ function App() {
       <form>
         
         <FormControl>
-          <InputLabel>Write a Todo</InputLabel>
+          <InputLabel>✅ Write a Todo</InputLabel>
           <Input onChange={inputHandler} value={inputValue}/>
         </FormControl>
           {/* the button will be disabled if the input value is empty */}
